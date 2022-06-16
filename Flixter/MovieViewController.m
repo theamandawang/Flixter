@@ -8,6 +8,7 @@
 #import "MovieViewController.h"
 #import "MovieTableViewCell.h"
 #import "UIImageView+AFNetworking.h"
+#import "DetailsViewController.h"
 
 @interface MovieViewController () <UITableViewDataSource>
 //@property (weak, nonatomic) IBOutlet UILabel *MyLabel;
@@ -75,22 +76,7 @@
     poster_path = [@"https://image.tmdb.org/t/p/w500" stringByAppendingString: poster_path];
     NSURL *posterURL = [NSURL URLWithString: poster_path];
     NSURLRequest *posterRequest = [NSURLRequest requestWithURL:posterURL cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
-
     [cell.movieImage setImageWithURL:posterURL];
-
-//    NSURLSession *posterSession = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
-//    NSURLSessionDataTask *task = [posterSession dataTaskWithRequest:posterRequest completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
-//           if (error != nil) {
-//               NSLog(@"%@", [error localizedDescription]);
-//           }
-//           else {
-//               cell.movieImage.image = [UIImage imageWithData:data];
-//           }
-//       }];
-//    [task resume];
-    
-    
-    
     return  cell;
 }
 
@@ -98,14 +84,17 @@
     return self.results.count;
 }
 
-/*
  #pragma mark - Navigation
  
- // In a storyboard-based application, you will often want to do a little preparation before navigation
+//  In a storyboard-based application, you will often want to do a little preparation before navigation
  - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
- // Get the new view controller using [segue destinationViewController].
- // Pass the selected object to the new view controller.
+//  Get the new view controller using [segue destinationViewController].
+//  Pass the selected object to the new view controller.
+     NSIndexPath *indexPath = [self.tableView indexPathForCell:(UITableViewCell *)sender];
+     NSDictionary *dataToPass = self.results[indexPath.row];
+     NSLog(@"%@", dataToPass);
+     DetailsViewController *next = [segue destinationViewController];
+     next.results = dataToPass;
  }
- */
 
 @end
