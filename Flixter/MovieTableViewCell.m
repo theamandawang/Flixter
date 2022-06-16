@@ -8,7 +8,6 @@
 #import "MovieTableViewCell.h"
 
 @implementation MovieTableViewCell
-
 - (void)awakeFromNib {
     [super awakeFromNib];
     // Initialization code

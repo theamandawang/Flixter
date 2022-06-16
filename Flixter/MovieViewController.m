@@ -6,7 +6,7 @@
 //
 
 #import "MovieViewController.h"
-
+#import "MovieTableViewCell.h"
 @interface MovieViewController () <UITableViewDataSource>
 //@property (weak, nonatomic) IBOutlet UILabel *MyLabel;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
@@ -40,6 +40,7 @@
                    string2 = [string2 stringByAppendingString: @"\n"];
                }
                self.tableView.dataSource = self;
+               self.tableView.rowHeight = 300;
 
                [self.tableView reloadData];
 //               self.MyLabel.text = string2;
@@ -48,8 +49,44 @@
     [task resume];
 }
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
-    cell.textLabel.text = self.results[indexPath.row][@"title"];
+//    UITableViewCell *cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:nil];
+//    cell.textLabel.text = self.results[indexPath.row][@"title"];
+    
+    MovieTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell" forIndexPath:indexPath];
+    NSDictionary *data = self.results[indexPath.row];
+    cell.movieTitle.text = data[@"title"];
+    cell.movieDescription.text = data[@"overview"];
+//    NSString *poster_path = data[@"poster_path"];
+//    NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=ed1cb9dcb86fd8882bb243d387cc1f37"];
+//    NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
+//    NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
+//    NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
+//           if (error != nil) {
+//               NSLog(@"%@", [error localizedDescription]);
+//           }
+//           else {
+//               NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+////               NSLog(@"%@", dataDictionary);// log an object with the %@ formatter.
+//               self.results = dataDictionary[@"results"];
+//               NSString *string2 = @"";
+//               self.tableView.dataSource = self;
+//               self.tableView.rowHeight = 100;
+//
+//               [self.tableView reloadData];
+////               self.MyLabel.text = string2;
+//           }
+//       }];
+//    [task resume];
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
     return  cell;
 }
 
