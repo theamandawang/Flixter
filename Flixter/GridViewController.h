@@ -9,7 +9,7 @@
 
 NS_ASSUME_NONNULL_BEGIN
 
-@interface GridViewController : UICollectionViewController
+@interface GridViewController : UIViewController <UICollectionViewDataSource, UICollectionViewDelegate>
 @end
 
 NS_ASSUME_NONNULL_END
