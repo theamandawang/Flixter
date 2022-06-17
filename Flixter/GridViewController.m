@@ -9,7 +9,9 @@
 #import "MovieCollectionViewCell.h"
 #import "DetailsViewController.h"
 #import "UIImageView+AFNetworking.h"
-@interface GridViewController ()
+@interface GridViewController () <UICollectionViewDataSource, UICollectionViewDelegate>
+@property (weak, nonatomic) IBOutlet UICollectionViewFlowLayout *flowLayout;
+@property (weak, nonatomic) IBOutlet UICollectionView *collectionView;
 @property (strong, nonatomic) NSArray *results;
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
 @end
@@ -51,6 +53,7 @@
 - (void)viewDidLoad {
     [super viewDidLoad];
     self.collectionView.dataSource = self;
+    self.collectionView.delegate = self;
     NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=ed1cb9dcb86fd8882bb243d387cc1f37"];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
@@ -98,6 +101,25 @@
     next.results = dataToPass;
 
 }
+
+
+//#pragma mark <UICollectionViewDelegate>
+- (void)viewDidLayoutSubviews {
+   [super viewDidLayoutSubviews];
+
+    self.flowLayout.scrollDirection = UICollectionViewScrollDirectionVertical;
+    self.flowLayout.minimumLineSpacing = 10;
+    self.flowLayout.minimumInteritemSpacing = 0;
+    self.flowLayout.sectionInset = UIEdgeInsetsMake(0, 0, 0, 0);
+}
+
+- (CGSize)collectionView:(UICollectionView *)collectionView layout:(UICollectionViewLayout *)collectionViewLayout sizeForItemAtIndexPath:(NSIndexPath *)indexPath{
+    int totalwidth = self.collectionView.bounds.size.width;
+    int numberOfCellsPerRow = 3;
+    int dimensions = (CGFloat)(totalwidth / numberOfCellsPerRow);
+    return CGSizeMake(dimensions, dimensions);
+}
+
 
 
 #pragma mark <UICollectionViewDataSource>
