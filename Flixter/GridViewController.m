@@ -7,6 +7,7 @@
 
 #import "GridViewController.h"
 #import "MovieCollectionViewCell.h"
+#import "DetailsViewController.h"
 #import "UIImageView+AFNetworking.h"
 @interface GridViewController ()
 @property (strong, nonatomic) NSArray *results;
@@ -15,7 +16,6 @@
 
 @implementation GridViewController
 
-static NSString * const reuseIdentifier = @"Cell";
 - (void) beginRefresh:(UIRefreshControl *)refreshControl {
     NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=ed1cb9dcb86fd8882bb243d387cc1f37"];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
@@ -84,15 +84,21 @@ static NSString * const reuseIdentifier = @"Cell";
     [task resume];
 }
 
-/*
 #pragma mark - Navigation
 
 // In a storyboard-based application, you will often want to do a little preparation before navigation
 - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-    // Get the new view controller using [segue destinationViewController].
-    // Pass the selected object to the new view controller.
+    //get "id" of clicked cell
+    NSIndexPath *indexPath = [self.collectionView indexPathForCell:(UICollectionViewCell *)sender];
+    //access the data for clicked cell
+    NSDictionary *dataToPass = self.results[indexPath.row];
+    //get view controller object for the next screen
+    DetailsViewController *next = [segue destinationViewController];
+    //set the public member of DetailsViewController to the data
+    next.results = dataToPass;
+
 }
-*/
+
 
 #pragma mark <UICollectionViewDataSource>
 
