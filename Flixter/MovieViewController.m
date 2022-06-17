@@ -14,7 +14,11 @@
 //@property (weak, nonatomic) IBOutlet UILabel *MyLabel;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
 @property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@property (weak, nonatomic) IBOutlet UISearchBar *searchBar;
 @property (strong, nonatomic) NSArray *results;
+//@property (strong, nonatomic) NSArray *titles;
+@property (strong, nonatomic) NSArray *filteredData;
+
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
 @end
 
@@ -43,6 +47,7 @@
            else {
                NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
                self.results = dataDictionary[@"results"];
+               self.filteredData = self.results;
                [self.tableView reloadData];
                [self.refreshControl endRefreshing];
                [self.activityIndicator stopAnimating];
@@ -54,6 +59,7 @@
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.searchBar.delegate = self;
     NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=ed1cb9dcb86fd8882bb243d387cc1f37"];
     [self.activityIndicator startAnimating];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
@@ -78,6 +84,7 @@
                //get the data
                NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
                self.results = dataDictionary[@"results"];
+               self.filteredData = self.results;
                self.tableView.dataSource = self;
                self.tableView.rowHeight = 300;
                [self.tableView reloadData];
@@ -90,11 +97,32 @@
        }];
     [task resume];
 }
+
+- (void)searchBar:(UISearchBar *)searchBar textDidChange:(NSString *)searchText {
+    
+    if (searchText.length != 0) {
+        
+        NSPredicate *predicate = [NSPredicate predicateWithBlock:^BOOL(NSDictionary *evaluatedObject, NSDictionary *bindings) {
+            return [evaluatedObject[@"title"] containsString:searchText];
+        }];
+        self.filteredData = [self.results filteredArrayUsingPredicate:predicate];
+        
+        NSLog(@"%@", self.filteredData);
+        
+    }
+    else {
+        self.filteredData = self.results;
+    }
+    
+    [self.tableView reloadData];
+}
+
+
 //for a cell at a specific indexPath, display the poster, title, and description
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
     MovieTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell" forIndexPath:indexPath];
-    NSDictionary *data = self.results[indexPath.row];
+    NSDictionary *data = self.filteredData[indexPath.row];
     cell.movieTitle.text = data[@"title"];
     cell.movieDescription.text = data[@"overview"];
     NSString *poster_path = data[@"poster_path"];
@@ -106,7 +134,7 @@
 }
 
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return self.results.count;
+    return self.filteredData.count;
 }
 
  #pragma mark - Navigation
@@ -115,7 +143,7 @@
      //get "id" of clicked cell
      NSIndexPath *indexPath = [self.tableView indexPathForCell:(UITableViewCell *)sender];
      //access the data for clicked cell
-     NSDictionary *dataToPass = self.results[indexPath.row];
+     NSDictionary *dataToPass = self.filteredData[indexPath.row];
      //get view controller object for the next screen
      DetailsViewController *next = [segue destinationViewController];
      //set the public member of DetailsViewController to the data
