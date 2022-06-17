@@ -27,9 +27,7 @@
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
            if (error != nil) {
                NSLog(@"%@", [error localizedDescription]);
-               UIAlertController * myAlert = [[UIAlertController alloc] init];
-               myAlert.title = @"Cannot Access Movies :(";
-               myAlert.message = @"Try connecting to WiFi";
+               UIAlertController * myAlert = [UIAlertController alertControllerWithTitle:@"Cannot Access Movies :(" message:@"Try connecting to WiFi" preferredStyle:UIAlertControllerStyleAlert];
                UIAlertAction * retry = [UIAlertAction
                                          actionWithTitle:@"Try Again"
                                          style:UIAlertActionStyleDefault
@@ -59,9 +57,7 @@
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
            if (error != nil) {
 //               NSLog(@"%@", [error localizedDescription]);
-               UIAlertController * myAlert = [[UIAlertController alloc] init];
-               myAlert.title = @"Cannot Access Movies :(";
-               myAlert.message = @"Try connecting to WiFi";
+               UIAlertController * myAlert = [UIAlertController alertControllerWithTitle:@"Cannot Access Movies :(" message:@"Try connecting to WiFi" preferredStyle:UIAlertControllerStyleAlert];
                UIAlertAction * retry = [UIAlertAction
                                          actionWithTitle:@"Try Again"
                                          style:UIAlertActionStyleDefault
