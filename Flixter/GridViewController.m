@@ -1,27 +1,23 @@
 //
-//  MovieViewController.m
+//  GridViewController.m
 //  Flixter
 //
-//  Created by Amanda Wang on 6/15/22.
+//  Created by Amanda Wang on 6/17/22.
 //
 
-#import "MovieViewController.h"
-#import "MovieTableViewCell.h"
+#import "GridViewController.h"
+#import "MovieCollectionViewCell.h"
 #import "UIImageView+AFNetworking.h"
-#import "DetailsViewController.h"
-
-@interface MovieViewController () <UITableViewDataSource>
-//@property (weak, nonatomic) IBOutlet UILabel *MyLabel;
-@property (weak, nonatomic) IBOutlet UITableView *tableView;
-@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
+@interface GridViewController ()
 @property (strong, nonatomic) NSArray *results;
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
 @end
 
-@implementation MovieViewController
+@implementation GridViewController
+
+static NSString * const reuseIdentifier = @"Cell";
 - (void) beginRefresh:(UIRefreshControl *)refreshControl {
     NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=ed1cb9dcb86fd8882bb243d387cc1f37"];
-    [self.activityIndicator startAnimating];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
@@ -42,20 +38,20 @@
            }
            else {
                NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
+               [self.collectionView reloadData];
                self.results = dataDictionary[@"results"];
-               [self.tableView reloadData];
                [self.refreshControl endRefreshing];
-               [self.activityIndicator stopAnimating];
 
            }
        }];
     [task resume];
     
 }
+
 - (void)viewDidLoad {
     [super viewDidLoad];
+    self.collectionView.dataSource = self;
     NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=ed1cb9dcb86fd8882bb243d387cc1f37"];
-    [self.activityIndicator startAnimating];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
@@ -67,7 +63,6 @@
                                             actionWithTitle:@"Try Again"
                                             style:UIAlertActionStyleDefault
                                             handler:^(UIAlertAction * action) {
-                                                //attempt to reload again
                                                 [self viewDidLoad];
                                             }];
                    [myAlert addAction:retry];
@@ -75,51 +70,50 @@
                }
            }
            else {
-               //get the data
+               //get results from api call
                NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
                self.results = dataDictionary[@"results"];
-               self.tableView.dataSource = self;
-               self.tableView.rowHeight = 300;
-               [self.tableView reloadData];
+               NSLog(@"%@", self.results);
+
+               [self.collectionView reloadData];
                self.refreshControl = [[UIRefreshControl alloc] init];
                [self.refreshControl addTarget:self action:@selector(beginRefresh:) forControlEvents:UIControlEventValueChanged];
-               [self.tableView insertSubview:self.refreshControl atIndex:0];
-               [self.activityIndicator stopAnimating];
-
+               [self.collectionView insertSubview:self.refreshControl atIndex:0];
            }
        }];
     [task resume];
 }
-//for a cell at a specific indexPath, display the poster, title, and description
 
-- (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath{
-    MovieTableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:@"MovieCell" forIndexPath:indexPath];
+/*
+#pragma mark - Navigation
+
+// In a storyboard-based application, you will often want to do a little preparation before navigation
+- (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
+    // Get the new view controller using [segue destinationViewController].
+    // Pass the selected object to the new view controller.
+}
+*/
+
+#pragma mark <UICollectionViewDataSource>
+
+- (NSInteger)numberOfSectionsInCollectionView:(UICollectionView *)collectionView {
+    return 1;
+}
+
+
+- (NSInteger)collectionView:(UICollectionView *)collectionView numberOfItemsInSection:(NSInteger)section {
+    return self.results.count;
+}
+
+//for a specific indexPath for a cell, load the poster image
+- (UICollectionViewCell *)collectionView:(UICollectionView *)collectionView cellForItemAtIndexPath:(NSIndexPath *)indexPath {
+    MovieCollectionViewCell *cell = [self.collectionView dequeueReusableCellWithReuseIdentifier:@"PosterCell" forIndexPath:indexPath];
     NSDictionary *data = self.results[indexPath.row];
-    cell.movieTitle.text = data[@"title"];
-    cell.movieDescription.text = data[@"overview"];
     NSString *poster_path = data[@"poster_path"];
     poster_path = [@"https://image.tmdb.org/t/p/w500" stringByAppendingString: poster_path];
     NSURL *posterURL = [NSURL URLWithString: poster_path];
     NSURLRequest *posterRequest = [NSURLRequest requestWithURL:posterURL cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
-    [cell.movieImage setImageWithURL:posterURL];
-    return  cell;
+    [cell.poster setImageWithURL:posterURL];
+    return cell;
 }
-
-- (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section{
-    return self.results.count;
-}
-
- #pragma mark - Navigation
- 
- - (void)prepareForSegue:(UIStoryboardSegue *)segue sender:(id)sender {
-     //get "id" of clicked cell
-     NSIndexPath *indexPath = [self.tableView indexPathForCell:(UITableViewCell *)sender];
-     //access the data for clicked cell
-     NSDictionary *dataToPass = self.results[indexPath.row];
-     //get view controller object for the next screen
-     DetailsViewController *next = [segue destinationViewController];
-     //set the public member of DetailsViewController to the data
-     next.results = dataToPass;
- }
-
 @end

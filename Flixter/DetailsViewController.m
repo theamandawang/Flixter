@@ -24,8 +24,6 @@
     NSURL *posterURL = [NSURL URLWithString: poster_path];
     NSURLRequest *posterRequest = [NSURLRequest requestWithURL:posterURL cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
     [self.poster setImageWithURL:posterURL];
-//
-    // Do any additional setup after loading the view.
 }
 
 /*
