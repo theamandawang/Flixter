@@ -13,25 +13,39 @@
 @interface MovieViewController () <UITableViewDataSource>
 //@property (weak, nonatomic) IBOutlet UILabel *MyLabel;
 @property (weak, nonatomic) IBOutlet UITableView *tableView;
+@property (weak, nonatomic) IBOutlet UIActivityIndicatorView *activityIndicator;
 @property (strong, nonatomic) NSArray *results;
 @property (strong, nonatomic) UIRefreshControl *refreshControl;
 @end
 
 @implementation MovieViewController
 - (void) beginRefresh:(UIRefreshControl *)refreshControl {
-//    [self.refreshControl beginRefreshing];
     NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=ed1cb9dcb86fd8882bb243d387cc1f37"];
+    [self.activityIndicator startAnimating];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
            if (error != nil) {
                NSLog(@"%@", [error localizedDescription]);
+               UIAlertController * myAlert = [[UIAlertController alloc] init];
+               myAlert.title = @"Cannot Access Movies :(";
+               myAlert.message = @"Try connecting to WiFi";
+               UIAlertAction * retry = [UIAlertAction
+                                         actionWithTitle:@"Try Again"
+                                         style:UIAlertActionStyleDefault
+                                         handler:^(UIAlertAction * action) {
+                                            [self beginRefresh:(refreshControl)];
+                                         }];
+               [myAlert addAction:retry];
+               [self presentViewController:myAlert animated:NO completion:nil];
            }
            else {
                NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
                self.results = dataDictionary[@"results"];
                [self.tableView reloadData];
                [self.refreshControl endRefreshing];
+               [self.activityIndicator stopAnimating];
+
            }
        }];
     [task resume];
@@ -39,22 +53,28 @@
 }
 - (void)viewDidLoad {
     [super viewDidLoad];
-    // Do any additional setup after loading the view.
     NSURL *url = [NSURL URLWithString:@"https://api.themoviedb.org/3/movie/now_playing?api_key=ed1cb9dcb86fd8882bb243d387cc1f37"];
     NSURLRequest *request = [NSURLRequest requestWithURL:url cachePolicy:NSURLRequestReloadIgnoringLocalCacheData timeoutInterval:10.0];
     NSURLSession *session = [NSURLSession sessionWithConfiguration:[NSURLSessionConfiguration defaultSessionConfiguration] delegate:nil delegateQueue:[NSOperationQueue mainQueue]];
     NSURLSessionDataTask *task = [session dataTaskWithRequest:request completionHandler:^(NSData *data, NSURLResponse *response, NSError *error) {
            if (error != nil) {
-               NSLog(@"%@", [error localizedDescription]);
+//               NSLog(@"%@", [error localizedDescription]);
+               UIAlertController * myAlert = [[UIAlertController alloc] init];
+               myAlert.title = @"Cannot Access Movies :(";
+               myAlert.message = @"Try connecting to WiFi";
+               UIAlertAction * retry = [UIAlertAction
+                                         actionWithTitle:@"Try Again"
+                                         style:UIAlertActionStyleDefault
+                                         handler:^(UIAlertAction * action) {
+                                            [self viewDidLoad];
+                                         }];
+               [myAlert addAction:retry];
+               [self presentViewController:myAlert animated:NO completion:nil];
            }
            else {
                NSDictionary *dataDictionary = [NSJSONSerialization JSONObjectWithData:data options:NSJSONReadingMutableContainers error:nil];
-//               NSLog(@"%@", dataDictionary);// log an object with the %@ formatter.
                self.results = dataDictionary[@"results"];
                NSLog(@"%@", self.results);
-               // TODO: Get the array of movies
-               // TODO: Store the movies in a property to use elsewhere
-               // TODO: Reload your table view data
                self.tableView.dataSource = self;
                self.tableView.rowHeight = 300;
                [self.tableView reloadData];
